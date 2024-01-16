@@ -9,6 +9,7 @@ router.post("/signup", UserController.signUp);
 router.post("/signin", UserController.signIn);
 router.get("/signout", UserController.signOut);
 router.get("/refresh", UserController.handleRefreshToken);
+router.get("/check",   UserController.check);
 
 
 module.exports = router;

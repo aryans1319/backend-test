@@ -3,12 +3,14 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid');
+const authorizeRoles = require('../middlewares/roles');
+
 
 const ACCESS_TOKEN_SECRET = "authnow";
 const REFRESH_TOKEN_SECRET = "authnow";
 
 const signUp = asyncHandler(async (req, res) => {
-      const { username, email, password, confirmPassword } = req.body;
+      const { username, email, password, confirmPassword, role } = req.body;
   
       try {
         if (!(username && email && password && confirmPassword)) {
@@ -36,6 +38,7 @@ const signUp = asyncHandler(async (req, res) => {
           password: hashedPassword,
           confirmPassword: confirmPassword,
           userID: userID,
+          role: role
         });
   
         res.status(201).json({
@@ -195,6 +198,9 @@ const signOut = asyncHandler(async (req, res) => {
     });
 });
 
+const check = asyncHandler(authorizeRoles(["admin"]), async(req, res) => {
+    res.status(200).json({ message: 'Admin-only route accessed successfully' });
+});
 
 const handleRefreshToken = asyncHandler(async (req, res) => {
     const cookies = req.cookies
@@ -284,4 +290,4 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
     )
 });
 
-module.exports = { signIn, signUp, signOut, handleRefreshToken };
+module.exports = { signIn, signUp, signOut, handleRefreshToken, check };
