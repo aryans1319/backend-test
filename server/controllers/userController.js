@@ -145,45 +145,56 @@ const signIn = asyncHandler(async (req, res) => {
 
 const signOut = asyncHandler(async (req, res) => {
     const cookies = req.cookies;
-    if(!cookies ?.jwt ){
-        res.status(204).json(
-            {
-                message: "No cookies"
-            }
-        )
+    if (!cookies?.jwt) {
+        return res.status(204).json({
+            message: "No cookies"
+        });
     }
-
+    console.log("ho");
     const refreshToken = cookies.jwt;
     // Is refresh token in DB? 
     const existingUser = await User.findOne({ refreshToken }).exec();
-    if(!existingUser) {
+    if (!existingUser) {
+        // Clear the cookie on the client side
         res.clearCookie(
             'jwt',
             {
-                httpOnly : true,
-                sameSite : 'none',
-                secure : false,
+                httpOnly: true,
+                sameSite: 'none',
+                secure: false,
             }
         );
-        res.status(204).json({
-            message : "Logged Out"
+        console.log("ho");
+        // Send the "Logged Out" message
+        return res.status(200).json({
+            message: "Logged Out"
         });
     }
+
     // Delete refresh token in the database
     existingUser.refreshToken = existingUser.refreshToken.filter(
         newToken => newToken !== refreshToken
     );
+
     const result = await existingUser.save();
     console.log(result);
+
+    // Clear the cookie on the client side
     res.clearCookie(
-        'refreshToken',
+        'jwt',
         {
-            httpOnly : true,
-            sameSite : 'none',
-            secure : false,
+            httpOnly: true,
+            sameSite: 'none',
+            secure: false,
         }
     );
+
+    // Send the "Logged Out" message
+    return res.status(200).json({
+        message: "Logged Out"
+    });
 });
+
 
 const handleRefreshToken = asyncHandler(async (req, res) => {
     const cookies = req.cookies
